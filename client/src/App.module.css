@@ -74,10 +74,6 @@ select {
   }
 }
 
-.App {
-  text-align: center;
-}
-
 .header {
   background-color: #282c34;
   min-height: 100vh;
@@ -89,14 +85,51 @@ select {
   color: white;
 }
 
+button {
+	border: none;
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+	border-radius: 3px;
+}
+
 .link {
   color: #b318f0;
 }
 
 .heroes_list {
-	text-align: left;
+	padding-left: 0;
+}
+
+.hero {
+  display: flex;
+  justify-content: space-between;
+}
+
+.hero div {
+	display: flex;
+}
+
+.hero button {
+	margin-left: 0.5rem;
+	margin-top: 0.2rem;
+	margin-bottom: 0.2rem;
+}
+
+.hero_button:hover {
+	background-color: #4CAF50;
+	color: white;
+}
+
+.hero_delete:hover {
+	background-color: red;
+	color: white;
 }
 
 .hero_id {
-  color: red;
+  color: orange;
+}
+
+label {
+	margin-right: 0.5rem;
 }
