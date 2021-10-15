@@ -1,29 +1,46 @@
+import {
+  createClient,
+  defaultExchanges,
+  subscriptionExchange,
+} from "@urql/core";
 import type { Component } from "solid-js";
-import { createResource, createSignal, For } from "solid-js";
-import { createClient } from "@urql/core";
-import { Hero } from "./Hero";
-
+import { createSignal, For } from "solid-js";
+import { SubscriptionClient } from "subscriptions-transport-ws";
+import { pipe, subscribe } from "wonka";
 import styles from "./App.module.css";
+import { Hero, IHero } from "./Hero";
+
+const subscriptionClient = new SubscriptionClient("ws://localhost:4000", {
+  reconnect: true,
+});
 
 const client = createClient({
   url: "http://localhost:4000",
+  exchanges: [
+    ...defaultExchanges,
+    subscriptionExchange({
+      forwardSubscription: (op) => subscriptionClient.request(op) as any,
+    }),
+  ],
 });
 
 const App: Component = () => {
-  const [heroes] = createResource(() =>
-    client
-      .query(
-        `
-	query allHeroes {
-	  getHeroes {
-		id
-		name
-	  }
-	}
-`
-      )
-      .toPromise()
-      .then(({ data }) => data.getHeroes)
+  const [heroes, setHeroes] = createSignal<IHero[]>([]);
+
+  const { unsubscribe } = pipe(
+    client.subscription(
+      `
+		subscription heroes {
+  heroes {
+    id
+    name
+  }
+}
+		`
+    ),
+    subscribe((result) => {
+      setHeroes(result.data.heroes);
+    })
   );
 
   const onUpdate = async (id: number, name: string) => {
