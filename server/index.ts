@@ -1,21 +1,25 @@
-import { GraphQLServer } from "graphql-yoga";
+import { GraphQLServer, PubSub } from "graphql-yoga";
 
-interface Hero {
-  id: number;
+const HEROES_CHANNEL = "HEROES_CHANNEL";
+
+const pubsub = new PubSub();
+
+interface IHero {
+  id: string;
   name: string;
 }
 
-let heroes: Hero[] = [
-  { id: 11, name: "Dr Nice" },
-  { id: 12, name: "Narco" },
-  { id: 13, name: "Bombasto" },
-  { id: 14, name: "Celeritas" },
-  { id: 15, name: "Magneta" },
-  { id: 16, name: "RubberMan" },
-  { id: 17, name: "Dynama" },
-  { id: 18, name: "Dr IQ" },
-  { id: 19, name: "Magma" },
-  { id: 20, name: "Tornado" },
+let heroes: IHero[] = [
+  { id: "1", name: "Dr Nice" },
+  { id: "2", name: "Narco" },
+  { id: "3", name: "Bombasto" },
+  { id: "4", name: "Celeritas" },
+  { id: "5", name: "Magneta" },
+  { id: "6", name: "RubberMan" },
+  { id: "7", name: "Dynama" },
+  { id: "8", name: "Dr IQ" },
+  { id: "9", name: "Magma" },
+  { id: "10", name: "Tornado" },
 ];
 
 const typeDefs = `
@@ -26,6 +30,12 @@ const typeDefs = `
 	type Query {
 		getHeroes: [Hero]!
 	}
+	type Mutation {
+		updateHero(id: ID!, name: String!): Hero
+	}
+	type Subscription {
+		heroes: [Hero]!
+	}
 `;
 
 const resolvers = {
@@ -34,11 +44,36 @@ const resolvers = {
       return heroes;
     },
   },
+  Mutation: {
+    updateHero: (
+      _: unknown,
+      { id, name }: { id: string; name: string },
+      { pubsub }: { pubsub: PubSub }
+    ) => {
+      const hero = heroes.find((hero) => hero.id === id);
+      if (!hero) {
+        throw new Error("Hero not found");
+      }
+      hero.name = name;
+      pubsub.publish(HEROES_CHANNEL, { heroes });
+      return hero;
+    },
+  },
+  Subscription: {
+    heroes: {
+      subscribe: () => {
+        const iterator = pubsub.asyncIterator(HEROES_CHANNEL);
+        pubsub.publish(HEROES_CHANNEL, { heroes });
+        return iterator;
+      },
+    },
+  },
 };
 
 const server = new GraphQLServer({
   typeDefs,
   resolvers,
+  context: { pubsub },
 });
 
-server.start(() => console.log("🚀 server is running on loccalhost:4000!"));
+server.start(() => console.log("🚀 Server is running on localhost:4000!"));

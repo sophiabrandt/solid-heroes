@@ -1,5 +1,5 @@
 import type { Component } from "solid-js";
-import { createResource, For } from "solid-js";
+import { createResource, createSignal, For } from "solid-js";
 import { createClient } from "@urql/core";
 import { Hero } from "./Hero";
 
@@ -9,10 +9,11 @@ const client = createClient({
   url: "http://localhost:4000",
 });
 
-const [heroes] = createResource(() =>
-  client
-    .query(
-      `
+const App: Component = () => {
+  const [heroes] = createResource(() =>
+    client
+      .query(
+        `
 	query allHeroes {
 	  getHeroes {
 		id
@@ -20,17 +21,37 @@ const [heroes] = createResource(() =>
 	  }
 	}
 `
-    )
-    .toPromise()
-    .then(({ data }) => data.getHeroes)
-);
+      )
+      .toPromise()
+      .then(({ data }) => data.getHeroes)
+  );
 
-const App: Component = () => {
+  const onUpdate = async (id: number, name: string) => {
+    await client
+      .mutation(
+        `
+mutation updateHero($id: ID!, $name: String!) {
+  updateHero(id: $id, name: $name) {
+    id
+    name
+  }
+}
+`,
+        {
+          id,
+          name,
+        }
+      )
+      .toPromise();
+  };
+
   return (
     <div class={styles.App}>
       <header class={styles.header}>
         <ul class={styles.heroes_list}>
-          <For each={heroes()}>{(hero) => <Hero hero={hero} />}</For>
+          <For each={heroes()}>
+            {(hero) => <Hero hero={hero} onUpdate={onUpdate} />}
+          </For>
         </ul>
       </header>
     </div>

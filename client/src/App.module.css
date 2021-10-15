@@ -110,6 +110,10 @@ button {
 	display: flex;
 }
 
+.hero_id {
+	color: orange;
+}
+
 .hero button {
 	margin-left: 0.5rem;
 	margin-top: 0.2rem;
@@ -124,10 +128,6 @@ button {
 .hero_delete:hover {
 	background-color: red;
 	color: white;
-}
-
-.hero_id {
-  color: orange;
 }
 
 label {
