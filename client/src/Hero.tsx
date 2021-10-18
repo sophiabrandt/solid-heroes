@@ -22,15 +22,15 @@ export const Hero = (props) => {
         when={editing()}
         fallback={
           <>
-			  <span class={styles.hero_id}>{props.hero.id}</span> {name()}
+            <span class={styles.hero_id}>{props.hero.id}</span> {name()}
             <div>
               <button
                 class={styles.hero_button}
                 onClick={() => setEditing(true)}
               >
-                🖉
+                Edit
               </button>
-              <button class={styles.hero_delete}>🗶</button>
+              <button class={styles.hero_delete}>Delete</button>
             </div>
           </>
         }
